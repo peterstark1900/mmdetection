@@ -35,6 +35,7 @@ from .wider_face import WIDERFaceDataset
 from .xml_style import XMLDataset
 from .youtube_vis_dataset import YouTubeVISDataset
 from .gold_fish import FishDataset
+from .fish1210 import Fish1210Dataset
 
 __all__ = [
     'XMLDataset', 'CocoDataset', 'DeepFashionDataset', 'VOCDataset',
@@ -50,5 +51,5 @@ __all__ = [
     'BaseSegDataset', 'ADE20KSegDataset', 'CocoSegDataset',
     'ADE20KInstanceDataset', 'iSAIDDataset', 'V3DetDataset', 'ConcatDataset',
     'ODVGDataset', 'MDETRStyleRefCocoDataset', 'DODDataset',
-    'CustomSampleSizeSampler', 'Flickr30kDataset','FishDataset'
+    'CustomSampleSizeSampler', 'Flickr30kDataset','FishDataset','Fish1210Dataset'
 ]
