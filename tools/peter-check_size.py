@@ -2,6 +2,7 @@ import math
 import json
 import cv2
 import json
+import os
 
 def calculate_bbox(center_piont, w, h):
     x, y = center_piont
@@ -13,16 +14,14 @@ def calculate_bbox(center_piont, w, h):
 
 def cut_with_bbox(raw_image,x1, y1, x2, y2,file_name):
     height, width, _ = raw_image.shape
-    # print(image_file_path)
-    # print(raw_image.shape)
-    # print(' ')
-    print(x1, y1, x2, y2)
-    print(width, height)
     if x1< 0 or y1 < 0 or x2 > width or y2 > height:
         print(f"Invalid crop area for image: {file_name}")
+        print(f"Image size: {width}x{height}")
+        print(f"Crop area: {x1}, {y1}, {x2}, {y2}")
+        return None, False
     else:
         cropped_image = raw_image[int(y1):int(y2), int(x1):int(x2)]
-        return cropped_image
+        return cropped_image, True
     
 def keypoints_tranformation(keypoints, x1, y1):
     new_keypoints = []
@@ -36,18 +35,85 @@ def keypoints_tranformation(keypoints, x1, y1):
             new_keypoints.extend([x-x1, y-y1, 2])
     return new_keypoints
 
-def file_pipeline(json_input_path, json_output_path,image_input_path,image_output_path):
+class CustomizeDataset:
+    def __init__(self,image_output_path,json_output_path,w,h):
+        self.images_list = []
+        self.annotations_list = []
+        self.categories_list = []
+        self.dataset_categories = []
+        self.image_name_counter = 0
+        self.image_save_path = image_output_path
+        self.json_export_path = json_output_path
+        self.width = w
+        self.height = h
+        #clear the content in the "json_output_path" and "image_output_path":
+        with open(json_output_path, 'w') as f:
+            f.write('')
+        for file in os.listdir(image_output_path):
+            os.remove(image_output_path + file)
+
+    
+    def get_width(self):
+        return self.width
+    
+    def get_height(self):
+        return self.height
+    
+    def update_list(self, values, list_type):
+        if list_type == 'categories':
+            for value in values:
+                if value['name'] not in self.dataset_categories:
+                    value['id'] = len(self.dataset_categories) + 1
+                    self.dataset_categories.append(value['name'])
+                    self.categories_list.append(value)
+                else:
+                    print(f"Category {value['name']} already exists in the dataset")
+        elif list_type == 'images':
+                self.images_list.append(values)
+        elif list_type == 'annotations':
+                self.annotations_list.append(values)
+
+    # match and return the category id 
+    def get_catergory_id(self, category_name):
+        for i in range(len(self.categories_list)):
+            if self.categories_list[i]['name'] == category_name:
+                return self.categories_list[i]['id']
+
+    def allocate_image_id(self):
+        self.image_name_counter += 1
+        
+    def get_image_id(self):
+        return self.image_name_counter
+
+    def save_image(self, image):
+        image_path = self.image_save_path + str(self.image_name_counter) + '.PNG'
+        cv2.imwrite(image_path, image)
+    
+    def export_json(self):
+        data = {
+            "categories": self.categories_list,
+            "images": self.images_list,
+            "annotations": self.annotations_list
+            
+        }
+        with open(self.json_export_path, 'w') as f:
+            json.dump(data, f, indent=4)
+
+
+def file_pipeline_old(json_input_path, json_output_path,image_input_path,image_output_path, w, h):
+
     with open(json_input_path, 'r') as f:
         data = json.load(f)
     for i in range(len(data['annotations'])):
         annotation = data['annotations'][i]
         bbox = annotation['bbox']
-        x, y, width, height = bbox
-        center_point = (x+width/2, y+height/2)
-        new_bbox = calculate_bbox(center_point, 100, 200)
-        x1, y1, x2, y2 = new_bbox
-
-
+        # x, y, width, height = bbox
+        # center_point = (x+width/2, y+height/2)
+        x = annotation['keypoints'][3]
+        y = annotation['keypoints'][4]
+        # print(x, y)
+        center_point = (x, y)
+        x1, y1, x2, y2 = calculate_bbox(center_point, w, h)
 
         image_id_to_file_name = {image['id']: image['file_name'] for image in data['images']}
         image_id = annotation['image_id']
@@ -61,62 +127,172 @@ def file_pipeline(json_input_path, json_output_path,image_input_path,image_outpu
         image_file_path = image_input_path+f'{file_name}'
 
         raw_image = cv2.imread(image_file_path)
-        cropped_image = cut_with_bbox(raw_image, x1, y1, x2, y2,)
+        print(file_name)
+        cropped_image = cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
         new_keypoints = keypoints_tranformation(annotation['keypoints'], x1, y1)
-        annotation['bbox'] = new_bbox
+        annotation['bbox'] = 0,0,w,h
         annotation['keypoints'] = new_keypoints
-        cv2.imwrite(image_output_path + + f'{file_name}', cropped_image)
+        cv2.imwrite(image_output_path + f'{file_name}', cropped_image)
     # 将修改后的数据写回到 JSON 文件中
     with open(json_output_path, 'w') as f:
         json.dump(data, f, indent=4)
 
-def sample_test_for_bbox(json_input_path,image_input_path):
+def file_pipeline(json_input_path,image_input_path,my_dataset):
+
+    w = my_dataset.get_width()
+    h = my_dataset.get_height()
+
+    # open the original json file
     with open(json_input_path, 'r') as f:
         data = json.load(f)
-    annotations = data['annotations'][0]
-    print(annotations['keypoints'])
 
-    # print(annotations)
-    # bbox = annotations['bbox']
-    # x, y, width, height = bbox
-    # center_point = (x+width/2, y+height/2)
-    x = annotations['keypoints'][3]
-    y = annotations['keypoints'][4]
+    # create a dictionary to store the image id and file name
+    image_id_to_file_name = {image['id']: image['file_name'] for image in data['images']}
+
+    # create a dictionary to store the category id and category name
+    category_id_to_name = {category['id']: category['name'] for category in data['categories']}
+
+    # update the categories list in the dataset
+    my_dataset.update_list(data['categories'], 'categories')
+
+    # iterate through all the annotations
+    for i in range(len(data['annotations'])):
+        annotation = data['annotations'][i]
+        #select keypoint "body" as the center point
+        x = annotation['keypoints'][3]
+        y = annotation['keypoints'][4]
+        center_point = (x, y)
+        x1, y1, x2, y2 = calculate_bbox(center_point, w, h)
+        # find the file name of the image
+        image_id = annotation['image_id']
+        file_name = image_id_to_file_name.get(image_id, None)
+        # read the original image
+        image_file_path = image_input_path+f'{file_name}'
+        raw_image = cv2.imread(image_file_path)
+        if raw_image is None:
+            print(f"Image not found: {image_file_path}")
+            continue
+
+        # crop the image
+        cropped_image,cropped_flag = cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
+        if cropped_flag == False:
+            print(f"Fail to crop the {file_name}, skip this image")
+            continue
+        else:
+            print(f"Successfully crop the {file_name}")
+            # save the cropped image
+            my_dataset.allocate_image_id()
+            my_dataset.save_image(cropped_image)
+            # get the information of the original image in `data['images']` 
+            temp_image_value = [image for image in data['images'] if image['id'] == image_id]
+            #update the image information
+            temp_image_value[0]['id'] = my_dataset.get_image_id()
+            temp_image_value[0]['file_name'] = f"{my_dataset.get_image_id()}.PNG"
+            temp_image_value[0]['width'] = w
+            temp_image_value[0]['height'] = h
+            my_dataset.update_list(temp_image_value[0], 'images')
+        
+        # modify the annotation information
+        new_keypoints = keypoints_tranformation(annotation['keypoints'], x1, y1)
+        annotation['bbox'] = 0,0,w,h
+        annotation['keypoints'] = new_keypoints
+        annotation['area'] = w*h
+        annotation['id'] = my_dataset.get_image_id()
+        annotation['image_id'] = my_dataset.get_image_id()
+        # get the category name
+        category_name = category_id_to_name.get(annotation['category_id'], None)
+        # update category id by the category name above
+        annotation['category_id'] = my_dataset.get_catergory_id(category_name)
+        # update the annotation information
+        my_dataset.update_list(annotation, 'annotations')
+    # export the new json file
+    my_dataset.export_json()
+
+    print(f'Dataset has been successfully created and saved to {my_dataset.json_export_path}')
+    print(f'Total number of images: {my_dataset.get_image_id()}')
+    print(' ')
+
+
+
+
+
+def sample_check_for_cropping(json_input_path,image_input_path,w,h,sample_id):
+    with open(json_input_path, 'r') as f:
+        data = json.load(f)
+    
+    # create a dictionary to store the image id and file name
+    image_id_to_file_name = {image['id']: image['file_name'] for image in data['images']}
+
+    annotation = data['annotations'][sample_id]
+    print(annotation['keypoints'])
+    #select keypoint "body" as the center point
+    x = annotation['keypoints'][3]
+    y = annotation['keypoints'][4]
     # print(x, y)
     center_point = (x, y)
-    new_bbox = calculate_bbox(center_point, 840, 840)
-    x1, y1, x2, y2 = new_bbox
-    image_id_to_file_name = {image['id']: image['file_name'] for image in data['images']}
-    image_id = annotations['image_id']
+    x1, y1, x2, y2 = calculate_bbox(center_point, w,h)
+    # find the file name of the image
+    image_id = annotation['image_id']
     file_name = image_id_to_file_name.get(image_id, None)
+    # read the original image
     image_file_path = image_input_path+f'{file_name}'
     raw_image = cv2.imread(image_file_path)
     if raw_image is None:
         print(f"Image not found: {image_file_path}")
         return
-    cropped_image = cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
-    cv2.imshow('result.png', cropped_image)
-    cv2.waitKey(3000)
-    cv2.destroyAllWindows()
+    else:
+        print(f"Successfully load the {file_name}")
+        
+        # crop the image
+        cropped_image,cropped_flag = cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
+        # transform the keypoints
+        new_keypoints = keypoints_tranformation(annotation['keypoints'], x1, y1)
+        # draw the keypoints on the cropped image
+        for i in range(0, len(new_keypoints), 3):
+            x = new_keypoints[i]
+            y = new_keypoints[i+1]
+            v = new_keypoints[i+2]
+            if v == 2:
+                cv2.circle(cropped_image, (int(x), int(y)), 5, (0, 255, 0), -1)
+        cv2.imshow('result.png', cropped_image)
+        cv2.waitKey(3000)
+        cv2.destroyAllWindows()
+    
 
 
 
 def main():
-
-
-    train_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/annotations/person_keypoints_Train.json'
+    # setup the training and testing dataset
     train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
-    train_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/images/Train/'
-    train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1202/images/Train/'
+    train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
+    fish1210_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path, 256, 256)
 
-    sample_test_for_bbox(train_json_input_path, train_image_input_path)
-    # file_pipeline(train_json_input_path, train_json_output_path,train_image_input_path,train_image_output_path)
+    test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
+    test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
+    fish1210_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path, 256, 256)
+##############################################################
+
+    # train_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/annotations/person_keypoints_Train.json'
+    # train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
+    # train_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/images/Train/'
+    # train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
+
+    demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/images/Train/'
+    demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/annotations/fish-1210-demo4.json'
+    # sample_check_for_cropping(demo4_json_input_path, demo4_image_input_path, w=256, h=256, sample_id = 12)
+    file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1210_dataset_train)
+##############################################################
 
     # test_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/annotations/person_keypoints_Test.json'
     # test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
     # test_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/images/Test/'
     # test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
-    # file_pipeline(test_json_input_path, test_json_output_path,test_image_input_path,test_image_output_path)
+
+    demo1_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/annotations/fish-1210-demo1.json'
+    demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
+    # sample_check_for_cropping(demo1_json_input_path, demo1_image_input_path, w=256, h=256, sample_id = 256)
+    file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test)
+
 
 if __name__ == '__main__':
     main()
