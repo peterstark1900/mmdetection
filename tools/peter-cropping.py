@@ -13,6 +13,9 @@ import os
 ''' Module of generating customized dataset for mmpose from CVAT
 
 This module is based on the COCO keypoints-1.0 format in CVAT. By using this module, the user can crop the image and transform the keypoints in the annotation file. The cropped image and the transformed keypoints will be saved in the new dataset. The new dataset will be saved in the specified path. The width and height of the cropped image can be set by the user. The user can also specify the path of the original dataset and the new dataset.
+
+TODO:
+    * The formate of the bbox in the annotation file is different from the formate of the bbox in the function "calculate_bbox". The formate of the bbox in the annotation file is (x, y, w, h), while the formate of the bbox in the function "calculate_bbox" is (x1, y1, x2, y2). In the future, the formate of the bbox in the function "calculate_bbox" should be changed to (x, y, w, h) to make it consistent with the formate of the bbox in the annotation file.
 '''
 
 
