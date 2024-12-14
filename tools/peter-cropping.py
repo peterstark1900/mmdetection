@@ -1,10 +1,31 @@
+'''
+@brief The code of cropping the image and transforming the keypoints
+@author Peter Stark
+@date 2021-12-10
+@version v0.2
+'''
 import math
 import json
 import cv2
 import json
 import os
 
+''' Module of generating customized dataset for mmpose from CVAT
+
+This module is based on the COCO keypoints-1.0 format in CVAT. By using this module, the user can crop the image and transform the keypoints in the annotation file. The cropped image and the transformed keypoints will be saved in the new dataset. The new dataset will be saved in the specified path. The width and height of the cropped image can be set by the user. The user can also specify the path of the original dataset and the new dataset.
+'''
+
+
+
 def calculate_bbox(center_piont, w, h):
+    '''function to calculate the bounding box of the cropped image
+    Args:
+        center_piont: the center point of the object
+        w: the width of the cropped image
+        h: the height of the cropped image
+    Returns:
+        x1, y1, x2, y2: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
+    '''
     x, y = center_piont
     x1 = x - w/2
     y1 = y - h/2
@@ -12,18 +33,37 @@ def calculate_bbox(center_piont, w, h):
     y2 = y + h/2
     return x1, y1, x2, y2
 
+
 def cut_with_bbox(raw_image,x1, y1, x2, y2,file_name):
+    '''function to crop the image with the bounding box
+    Args:
+        raw_image: the original image
+        x1, y1, x2, y2: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
+        file_name: the name of the image file
+    Returns:
+        cropped_image: the cropped image
+        cropped_flag: a flag to indicate whether the cropping is successful. If the cropping is successful, the flag is True. Otherwise, the flag is False.
+    '''
     height, width, _ = raw_image.shape
     if x1< 0 or y1 < 0 or x2 > width or y2 > height:
         print(f"Invalid crop area for image: {file_name}")
         print(f"Image size: {width}x{height}")
         print(f"Crop area: {x1}, {y1}, {x2}, {y2}")
-        return None, False
+        cropped_flag =  False
+        return None, cropped_flag
     else:
         cropped_image = raw_image[int(y1):int(y2), int(x1):int(x2)]
-        return cropped_image, True
+        cropped_flag = True
+        return cropped_image, cropped_flag
     
 def keypoints_tranformation(keypoints, x1, y1):
+    ''' function to transform the keypoints
+    Args:
+        keypoints: the keypoints of the object
+        x1, y1: the top-left point of the bounding box
+    Returns:
+        new_keypoints: the transformed keypoints
+    '''
     new_keypoints = []
     for i in range(0, len(keypoints), 3):
         x = keypoints[i]
@@ -36,7 +76,17 @@ def keypoints_tranformation(keypoints, x1, y1):
     return new_keypoints
 
 class CustomizeDataset:
+    ''' 
+    Class of generating customized dataset for mmpose from CVAT
+    '''
     def __init__(self,image_output_path,json_output_path,w,h):
+        '''function to initialize the dataset
+        Args:
+            image_output_path: the path to save the cropped images
+            json_output_path: the path to save the new dataset
+            w: the width of the cropped image
+            h: the height of the cropped image
+        '''
         self.images_list = []
         self.annotations_list = []
         self.categories_list = []
@@ -60,6 +110,11 @@ class CustomizeDataset:
         return self.height
     
     def update_list(self, values, list_type):
+        '''function to update the list of categories, images, and annotations
+        Args:
+            values: the values to be updated
+            list_type: the type of the list
+        '''
         if list_type == 'categories':
             for value in values:
                 if value['name'] not in self.dataset_categories:
@@ -75,6 +130,12 @@ class CustomizeDataset:
 
     # match and return the category id 
     def get_catergory_id(self, category_name):
+        '''function to match and return the category id
+        Args:
+            category_name: the name of the category
+        Returns:    
+            the category id
+        '''
         for i in range(len(self.categories_list)):
             if self.categories_list[i]['name'] == category_name:
                 return self.categories_list[i]['id']
@@ -86,10 +147,17 @@ class CustomizeDataset:
         return self.image_name_counter
 
     def save_image(self, image):
+        '''function to save the image
+        Args:   
+            image: the image to be saved
+        '''
         image_path = self.image_save_path + str(self.image_name_counter) + '.PNG'
         cv2.imwrite(image_path, image)
     
     def export_json(self):
+        '''
+        function to export the dataset to a json file
+        '''
         data = {
             "categories": self.categories_list,
             "images": self.images_list,
@@ -100,44 +168,13 @@ class CustomizeDataset:
             json.dump(data, f, indent=4)
 
 
-def file_pipeline_old(json_input_path, json_output_path,image_input_path,image_output_path, w, h):
-
-    with open(json_input_path, 'r') as f:
-        data = json.load(f)
-    for i in range(len(data['annotations'])):
-        annotation = data['annotations'][i]
-        bbox = annotation['bbox']
-        # x, y, width, height = bbox
-        # center_point = (x+width/2, y+height/2)
-        x = annotation['keypoints'][3]
-        y = annotation['keypoints'][4]
-        # print(x, y)
-        center_point = (x, y)
-        x1, y1, x2, y2 = calculate_bbox(center_point, w, h)
-
-        image_id_to_file_name = {image['id']: image['file_name'] for image in data['images']}
-        image_id = annotation['image_id']
-        file_name = image_id_to_file_name.get(image_id, None)
-        image_file_path = image_input_path+f'{file_name}'
-        # 读取图片
-        old_image = cv2.imread(image_file_path)
-        if old_image is None:
-            print(f"Image not found: {image_file_path}")
-            continue
-        image_file_path = image_input_path+f'{file_name}'
-
-        raw_image = cv2.imread(image_file_path)
-        print(file_name)
-        cropped_image = cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
-        new_keypoints = keypoints_tranformation(annotation['keypoints'], x1, y1)
-        annotation['bbox'] = 0,0,w,h
-        annotation['keypoints'] = new_keypoints
-        cv2.imwrite(image_output_path + f'{file_name}', cropped_image)
-    # 将修改后的数据写回到 JSON 文件中
-    with open(json_output_path, 'w') as f:
-        json.dump(data, f, indent=4)
-
 def file_pipeline(json_input_path,image_input_path,my_dataset):
+    '''function to process the dataset
+    Args:
+        json_input_path: the path of the original json file
+        image_input_path: the path of the original images
+        my_dataset: the object of the dataset
+    '''
 
     w = my_dataset.get_width()
     h = my_dataset.get_height()
@@ -217,6 +254,14 @@ def file_pipeline(json_input_path,image_input_path,my_dataset):
 
 
 def sample_check_for_cropping(json_input_path,image_input_path,w,h,sample_id):
+    '''function to check the cropping result
+    Args:
+        json_input_path: the path of the original json file
+        image_input_path: the path of the original images
+        w: the width of the cropped image
+        h: the height of the cropped image
+        sample_id: the id of the sample to be checked
+    '''
     with open(json_input_path, 'r') as f:
         data = json.load(f)
     
@@ -262,6 +307,16 @@ def sample_check_for_cropping(json_input_path,image_input_path,w,h,sample_id):
 
 
 def main():
+    '''function to run the pipeline
+
+    The main function could be devided into 3 parts:
+    1. Setup the output path of the new dataset
+    2. Setup the input path for the training dataset
+    3. Setup the input path for the testing dataset
+
+    Before running the main function, the user could use the fuction "sample_check_for_cropping" to check the cropping result. 
+    '''
+##############################################################
     # setup the training and testing dataset
     train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
     train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
@@ -292,7 +347,7 @@ def main():
     demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
     # sample_check_for_cropping(demo1_json_input_path, demo1_image_input_path, w=256, h=256, sample_id = 256)
     file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test)
-
+##############################################################
 
 if __name__ == '__main__':
     main()
