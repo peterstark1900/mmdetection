@@ -9,7 +9,10 @@ import json
 import cv2
 import json
 import os
+''' Module for expanding the bounding box
 
+The origianl dataset from CVAT is not suitable for mmdetection because the bbox so tight that the fish is merely in the bbox, which would affect the performance of the mmpose model. Therefore, module are used to expand the bbox to make sure the fish is in the bbox.
+'''
 #expand the bbox with scale
 def expand_bbox(raw_bbox, scale):
     ''' function to expand the bounding box with a scale
