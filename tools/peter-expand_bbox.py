@@ -1,3 +1,9 @@
+'''
+@brief This script is used to expand the bounding box 
+@author Peter Stark
+@date 2024-12-13
+@version v1.1
+'''
 import math
 import json
 import cv2
@@ -6,6 +12,13 @@ import os
 
 #expand the bbox with scale
 def expand_bbox(raw_bbox, scale):
+    ''' function to expand the bounding box with a scale
+    Args:
+        `raw_bbox`: list, [x1, y1, w, h]
+        `scale`: float, the scale to expand the bbox
+    Returns:
+        `new_x1`, `new_y1`, `new_w`, `new_h`: float, the new bounding box
+    '''
     x1, y1, w, h = raw_bbox
     x2 = x1 + w
     y2 = y1 + h
@@ -23,6 +36,11 @@ def expand_bbox(raw_bbox, scale):
 
 class CustomizeDataset:
     def __init__(self,image_output_path,json_output_path):
+        ''' function to initialize the dataset
+        Args:
+            `image_output_path`: str, the path to save the images
+            `json_output_path`: str, the path to save the json file
+        '''
         self.images_list = []
         self.annotations_list = []
         self.categories_list = []
@@ -37,6 +55,11 @@ class CustomizeDataset:
             os.remove(image_output_path + file)
     
     def update_list(self, values, list_type):
+        ''' function to update the list of categories, images, and annotations
+        Args:
+            `values`: list, the values to be added to the list
+            `list_type`: str, the type of the list
+        '''
         if list_type == 'categories':
             for value in values:
                 if value['name'] not in self.dataset_categories:
@@ -78,7 +101,13 @@ class CustomizeDataset:
 
 
 def file_pipeline(json_input_path,image_input_path,my_dataset,scale):
-
+    ''' function to process the json file and images
+    Args:
+        `json_input_path`: str, the path to the json file
+        `image_input_path`: str, the path to the images
+        `my_dataset`: object, the dataset object
+        `scale`: float, the scale to expand the bounding box
+    '''
     # open the original json file
     with open(json_input_path, 'r') as f:
         data = json.load(f)
@@ -140,6 +169,14 @@ def file_pipeline(json_input_path,image_input_path,my_dataset,scale):
 
 
 def sample_check_for_expanding(json_input_path,image_input_path,scale,sample_id):
+    ''' function to check the result of expanding the bounding box
+    Args:
+        `json_input_path`: str, the path to the json file
+        `image_input_path`: str, the path to the images
+        `scale`: float, the scale to expand the bounding box
+        `sample_id`: int, the index of the sample to be checked
+    '''
+    
     with open(json_input_path, 'r') as f:
         data = json.load(f)
     
@@ -178,6 +215,16 @@ def sample_check_for_expanding(json_input_path,image_input_path,scale,sample_id)
 
 
 def main():
+    ''' function to run the the pipeline
+
+    The main fucntion could be devided into 3 parts:
+    1. Setup the output path of the new dataset
+    2. Setup the input path for the training dataset
+    3. Setup the input path for the testing dataset
+
+    Before running the main function, the user coudl use the function `sample_check_for_expanding` to check the result of expanding the bounding box    
+    '''
+##############################################################
     # setup the training and testing dataset
     train_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
     train_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Train/'
@@ -208,7 +255,7 @@ def main():
     demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
     # sample_check_for_expanding(demo1_json_input_path, demo1_image_input_path, scale = 2, sample_id = 123)
     file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test,scale = 1.5)
-
+##############################################################
 
 if __name__ == '__main__':
     main()

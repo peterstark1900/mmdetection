@@ -1,8 +1,8 @@
 '''
 @brief The code of cropping the image and transforming the keypoints
 @author Peter Stark
-@date 2021-12-10
-@version v0.2
+@date 2024-12-13
+@version v1.3
 '''
 import math
 import json
@@ -23,11 +23,11 @@ TODO:
 def calculate_bbox(center_piont, w, h):
     '''function to calculate the bounding box of the cropped image
     Args:
-        center_piont: the center point of the object
-        w: the width of the cropped image
-        h: the height of the cropped image
+        `center_piont`: the center point of the object
+        `w`: the width of the cropped image
+        `h`: the height of the cropped image
     Returns:
-        x1, y1, x2, y2: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
+        `x1`, `y1`, `x2`, `y2`: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
     '''
     x, y = center_piont
     x1 = x - w/2
@@ -40,12 +40,12 @@ def calculate_bbox(center_piont, w, h):
 def cut_with_bbox(raw_image,x1, y1, x2, y2,file_name):
     '''function to crop the image with the bounding box
     Args:
-        raw_image: the original image
-        x1, y1, x2, y2: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
+        `raw_image`: the original image
+        `x1`, `y1`, `x2`, `y2`: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
         file_name: the name of the image file
     Returns:
-        cropped_image: the cropped image
-        cropped_flag: a flag to indicate whether the cropping is successful. If the cropping is successful, the flag is True. Otherwise, the flag is False.
+        `cropped_image`: the cropped image
+        `cropped_flag`: a flag to indicate whether the cropping is successful. If the cropping is successful, the flag is True. Otherwise, the flag is False.
     '''
     height, width, _ = raw_image.shape
     if x1< 0 or y1 < 0 or x2 > width or y2 > height:
@@ -62,8 +62,8 @@ def cut_with_bbox(raw_image,x1, y1, x2, y2,file_name):
 def keypoints_tranformation(keypoints, x1, y1):
     ''' function to transform the keypoints
     Args:
-        keypoints: the keypoints of the object
-        x1, y1: the top-left point of the bounding box
+        `keypoints`: the keypoints of the object
+        `x1`, `y1`: the top-left point of the bounding box
     Returns:
         new_keypoints: the transformed keypoints
     '''
@@ -85,10 +85,10 @@ class CustomizeDataset:
     def __init__(self,image_output_path,json_output_path,w,h):
         '''function to initialize the dataset
         Args:
-            image_output_path: the path to save the cropped images
-            json_output_path: the path to save the new dataset
-            w: the width of the cropped image
-            h: the height of the cropped image
+            `image_output_path`: the path to save the cropped images
+            `json_output_path`: the path to save the new dataset
+            `w`: the width of the cropped image
+            `h`: the height of the cropped image
         '''
         self.images_list = []
         self.annotations_list = []
@@ -115,8 +115,8 @@ class CustomizeDataset:
     def update_list(self, values, list_type):
         '''function to update the list of categories, images, and annotations
         Args:
-            values: the values to be updated
-            list_type: the type of the list
+            `values`: the values to be updated
+            `list_type`: the type of the list
         '''
         if list_type == 'categories':
             for value in values:
@@ -174,9 +174,9 @@ class CustomizeDataset:
 def file_pipeline(json_input_path,image_input_path,my_dataset):
     '''function to process the dataset
     Args:
-        json_input_path: the path of the original json file
-        image_input_path: the path of the original images
-        my_dataset: the object of the dataset
+        `json_input_path`: the path of the original json file
+        `image_input_path`: the path of the original images
+        `my_dataset`: the object of the dataset
     '''
 
     w = my_dataset.get_width()
@@ -259,11 +259,11 @@ def file_pipeline(json_input_path,image_input_path,my_dataset):
 def sample_check_for_cropping(json_input_path,image_input_path,w,h,sample_id):
     '''function to check the cropping result
     Args:
-        json_input_path: the path of the original json file
-        image_input_path: the path of the original images
-        w: the width of the cropped image
-        h: the height of the cropped image
-        sample_id: the id of the sample to be checked
+        `json_input_path`: the path of the original json file
+        `image_input_path`: the path of the original images
+        `w`: the width of the cropped image
+        `h`: the height of the cropped image
+        `sample_id`: the id of the sample to be checked
     '''
     with open(json_input_path, 'r') as f:
         data = json.load(f)
