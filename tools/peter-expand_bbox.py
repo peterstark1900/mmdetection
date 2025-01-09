@@ -11,7 +11,7 @@ import json
 import os
 ''' Module for expanding the bounding box
 
-The origianl dataset from CVAT is not suitable for mmdetection because the bbox so tight that the fish is merely in the bbox, which would affect the performance of the mmpose model. Therefore, module are used to expand the bbox to make sure the fish is in the bbox.
+The origianl dataset from CVAT is not suitable for mmdetection because the bbox so tight that the fish is merely in the bbox, which would affect the performance of the mmdetection model. Therefore, module are used to expand the bbox to make sure the fish is in the bbox.
 '''
 #expand the bbox with scale
 def expand_bbox(raw_bbox, scale):
@@ -160,6 +160,12 @@ def file_pipeline(json_input_path,image_input_path,my_dataset,scale):
         annotation['category_id'] = my_dataset.get_catergory_id(category_name)
         # update the annotation information
         my_dataset.update_list(annotation, 'annotations')
+
+def end_pipeline(my_dataset):
+    ''' function to end the pipeline
+    Args:
+        `my_dataset`: object, the dataset object
+    '''
     # export the new json file
     my_dataset.export_json()
 
@@ -229,35 +235,70 @@ def main():
     '''
 ##############################################################
     # setup the training and testing dataset
-    train_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
-    train_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Train/'
-    fish1210_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path)
 
-    test_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
-    test_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Test/'
-    fish1210_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path)
+    # train_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
+    # train_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Train/'
+    # fish1210_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path)
+
+    # test_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
+    # test_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Test/'
+    # fish1210_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path)
+
+    train_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1222/annotations/Fish-Tracker-1222-Train.json'
+    train_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1222/images/Train/'
+    fish1222_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path)
+
+    test_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1222/annotations/Fish-Tracker-1222-Test.json'
+    test_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1222/images/Test/'
+    fish1222_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path)
 ##############################################################
 
     # train_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/annotations/person_keypoints_Train.json'
-    # train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
+    # train_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
     # train_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/images/Train/'
-    # train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
+    # train_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Train/'
 
-    demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/images/Train/'
-    demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/annotations/fish-1210-demo4.json'
-    # sample_check_for_expanding(demo4_json_input_path, demo4_image_input_path, scale = 2.0, sample_id = 300)
-    file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1210_dataset_train,scale = 1.5)
+    # demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/images/Train/'
+    # demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/annotations/fish-1210-demo4.json'
+    # # sample_check_for_expanding(demo4_json_input_path, demo4_image_input_path, scale = 2.0, sample_id = 300)
+
+    demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo4/images/Train/'
+    demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo4/annotations/fish-1222-demo4.json'
+    # sample_check_for_expanding(demo4_json_input_path, demo4_image_input_path, scale = 2.0, sample_id = 21)
+
+    demo6_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo6/images/Train/'
+    demo6_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo6/annotations/fish-1222-demo6.json'
+    # sample_check_for_expanding(demo6_json_input_path, demo6_image_input_path, scale = 2.0, sample_id = 300)
+
+    # file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1210_dataset_train,scale = 1.5)
+    # end_pipeline(fish1210_dataset_train)
+    file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1222_dataset_train,scale = 2.0)
+    file_pipeline(demo6_json_input_path,demo6_image_input_path,fish1222_dataset_train,scale = 2.0)
+    end_pipeline(fish1222_dataset_train)
+
 ##############################################################
 
     # test_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/annotations/person_keypoints_Test.json'
-    # test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
+    # test_json_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
     # test_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/images/Test/'
-    # test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
+    # test_image_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1210/images/Test/'
 
-    demo1_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/annotations/fish-1210-demo1.json'
-    demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
-    # sample_check_for_expanding(demo1_json_input_path, demo1_image_input_path, scale = 2, sample_id = 123)
-    file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test,scale = 1.5)
+    # demo1_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/annotations/fish-1210-demo1.json'
+    # demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
+    # # sample_check_for_expanding(demo1_json_input_path, demo1_image_input_path, scale = 2, sample_id = 123)
+
+    demo3_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo3/annotations/fish-1222-demo3.json'
+    demo3_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo3/images/Test/'
+    # sample_check_for_expanding(demo3_json_input_path, demo3_image_input_path, scale = 2, sample_id = 123)
+    demo7_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo7/annotations/fish-1222-demo7.json'
+    demo7_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo7/images/Test/'
+    # sample_check_for_expanding(demo7_json_input_path, demo7_image_input_path, scale = 2, sample_id = 123)
+
+    # file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test,scale = 1.5)
+    # end_pipeline(fish1210_dataset_test)
+    file_pipeline(demo3_json_input_path,demo3_image_input_path,fish1222_dataset_test,scale = 2.0)
+    file_pipeline(demo7_json_input_path,demo7_image_input_path,fish1222_dataset_test,scale = 2.0)
+    end_pipeline(fish1222_dataset_test)
 ##############################################################
 
 if __name__ == '__main__':

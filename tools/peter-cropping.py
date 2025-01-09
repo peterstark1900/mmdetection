@@ -9,7 +9,7 @@ import json
 import cv2
 import json
 import os
-
+import numpy as np
 ''' Module of generating customized dataset for mmpose from CVAT
 
 This module is based on the COCO keypoints-1.0 format in CVAT. By using this module, the user can crop the image and transform the keypoints in the annotation file. The cropped image and the transformed keypoints will be saved in the new dataset. The new dataset will be saved in the specified path. The width and height of the cropped image can be set by the user. The user can also specify the path of the original dataset and the new dataset.
@@ -49,11 +49,14 @@ def cut_with_bbox(raw_image,x1, y1, x2, y2,file_name):
     '''
     height, width, _ = raw_image.shape
     if x1< 0 or y1 < 0 or x2 > width or y2 > height:
-        print(f"Invalid crop area for image: {file_name}")
+        print(f"Invalid crop area for origin image: {file_name}")
         print(f"Image size: {width}x{height}")
         print(f"Crop area: {x1}, {y1}, {x2}, {y2}")
-        cropped_flag =  False
-        return None, cropped_flag
+        expand_image = cv2.copyMakeBorder(raw_image, height, height, width, width, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+        cropped_image = expand_image[int(y1)+height:int(y2)+height, int(x1)+width:int(x2)+width]
+        cropped_flag = True
+        print(f"Successfully crop the {file_name} after expanding the image")
+        return cropped_image, cropped_flag
     else:
         cropped_image = raw_image[int(y1):int(y2), int(x1):int(x2)]
         cropped_flag = True
@@ -245,9 +248,15 @@ def file_pipeline(json_input_path,image_input_path,my_dataset):
         annotation['category_id'] = my_dataset.get_catergory_id(category_name)
         # update the annotation information
         my_dataset.update_list(annotation, 'annotations')
-    # export the new json file
-    my_dataset.export_json()
+    print(f'Finish processing the dataset from {json_input_path}')
 
+# export the new json file
+def end_pipeline(my_dataset):
+    '''function to export the new json file
+    Args:
+        `my_dataset`: the object of the dataset
+    '''
+    my_dataset.export_json()
     print(f'Dataset has been successfully created and saved to {my_dataset.json_export_path}')
     print(f'Total number of images: {my_dataset.get_image_id()}')
     print(' ')
@@ -320,14 +329,23 @@ def main():
     Before running the main function, the user could use the fuction "sample_check_for_cropping" to check the cropping result. 
     '''
 ##############################################################
-    # setup the training and testing dataset
-    train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
-    train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
-    fish1210_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path, 256, 256)
+    # # setup the training and testing dataset
 
-    test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
-    test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
-    fish1210_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path, 256, 256)
+    # # train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Train.json'
+    # # train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
+    # # fish1210_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path, 256, 256)
+
+    # # test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/annotations/Fish-Tracker-1210-Test.json'
+    # # test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
+    # # fish1210_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path, 256, 256)
+
+    train_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/annotations/Fish-Tracker-1222-Train.json'
+    train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/images/Train/'
+    fish1222_dataset_train = CustomizeDataset(train_image_output_path, train_json_output_path, 256, 256)
+
+    test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/annotations/Fish-Tracker-1222-Test.json'
+    test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/images/Test/'
+    fish1222_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path, 256, 256)
 ##############################################################
 
     # train_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/annotations/person_keypoints_Train.json'
@@ -335,10 +353,28 @@ def main():
     # train_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/images/Train/'
     # train_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Train/'
 
-    demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/images/Train/'
-    demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/annotations/fish-1210-demo4.json'
-    # sample_check_for_cropping(demo4_json_input_path, demo4_image_input_path, w=256, h=256, sample_id = 12)
-    file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1210_dataset_train)
+    # demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/images/Train/'
+    # demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo4/annotations/fish-1210-demo4.json'
+    # # sample_check_for_cropping(demo4_json_input_path, demo4_image_input_path, w=256, h=256, sample_id = 12)
+
+    # demo4_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo4/images/Train/'
+    # demo4_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo4/annotations/fish-1222-demo4.json'
+    # # sample_check_for_cropping(demo4_json_input_path, demo4_image_input_path, w=256, h=256, sample_id = 12)
+    # demo6_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo6/images/Train/'
+    # demo6_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo6/annotations/fish-1222-demo6.json'
+    # # sample_check_for_cropping(demo6_json_input_path, demo6_image_input_path, w=256, h=256, sample_id = 12)
+
+    demo19_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    demo19_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    # sample_check_for_cropping(demo19_json_input_path, demo19_image_input_path, w=256, h=256, sample_id = 12)
+
+    # file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1210_dataset_train)
+    # end_pipeline(fish1210_dataset_train)
+    # file_pipeline(demo4_json_input_path,demo4_image_input_path,fish1222_dataset_train)
+    # file_pipeline(demo6_json_input_path,demo6_image_input_path,fish1222_dataset_train)
+    # end_pipeline(fish1222_dataset_train)
+    file_pipeline(demo19_json_input_path,demo19_image_input_path,fish1222_dataset_train)
+    end_pipeline(fish1222_dataset_train)
 ##############################################################
 
     # test_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/annotations/person_keypoints_Test.json'
@@ -346,10 +382,28 @@ def main():
     # test_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_160115/images/Test/'
     # test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1210/images/Test/'
 
-    demo1_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/annotations/fish-1210-demo1.json'
-    demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
-    # sample_check_for_cropping(demo1_json_input_path, demo1_image_input_path, w=256, h=256, sample_id = 256)
-    file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test)
+    # demo1_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/annotations/fish-1210-demo1.json'
+    # demo1_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/fish-1210-demo1/images/Test/'
+    # # sample_check_for_cropping(demo1_json_input_path, demo1_image_input_path, w=256, h=256, sample_id = 256)
+
+    # demo3_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo3/annotations/fish-1222-demo3.json'
+    # demo3_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo3/images/Test/'
+    # # sample_check_for_cropping(demo3_json_input_path, demo3_image_input_path, w=256, h=256, sample_id = 12)
+    # demo7_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo7/annotations/fish-1222-demo7.json'
+    # demo7_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo7/images/Test/'
+    # # sample_check_for_cropping(demo7_json_input_path, demo7_image_input_path, w=256, h=256, sample_id = 31)
+
+    demo18_image_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    demo18_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    # sample_check_for_cropping(demo18_json_input_path, demo18_image_input_path, w=256, h=256, sample_id = 123)
+
+    # file_pipeline(demo1_json_input_path,demo1_image_input_path,fish1210_dataset_test)
+    # end_pipeline(fish1210_dataset_test)
+    # file_pipeline(demo3_json_input_path,demo3_image_input_path,fish1222_dataset_test)
+    # file_pipeline(demo7_json_input_path,demo7_image_input_path,fish1222_dataset_test)
+    # end_pipeline(fish1222_dataset_test)
+    file_pipeline(demo18_json_input_path,demo18_image_input_path,fish1222_dataset_test)
+    end_pipeline(fish1222_dataset_test)
 ##############################################################
 
 if __name__ == '__main__':
