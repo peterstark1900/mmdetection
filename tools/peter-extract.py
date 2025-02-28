@@ -31,11 +31,28 @@ def extract_frames_from_videos(source_dir, dest_dir):
         cap.release()
         print(f"Finished processing video: {video_file}, extracted {frame_idx} frames.")
 
+def rename_old_picture(source_dir,new_title):
+    # add a cutomized name before the old name
+    old_pictures = [f for f in os.listdir(source_dir)
+                    if f.lower().endswith(('.png'))]
+    for old_picture in old_pictures:
+        old_picture_path = os.path.join(source_dir, old_picture)
+        new_picture_path = os.path.join(source_dir, new_title+old_picture)
+        os.rename(old_picture_path,new_picture_path)
+        print(f"Finished renaming picture: {old_picture} to {new_title+old_picture}")
+
 def main():
-    # 示例调用，将目录A下的视频帧导出到目录B（请根据实际路径修改）
-    source_directory = '/home/peter/Desktop/Fish-Dataset/Fish-0223/original'
-    destination_directory = '/home/peter/Desktop/Fish-Dataset/Fish-0223/temp-version'
-    extract_frames_from_videos(source_directory, destination_directory)
+    # # 示例调用，将目录A下的视频帧导出到目录B（请根据实际路径修改）
+    # source_directory = '/home/peter/Desktop/Fish-Dataset/Fish-0223/original'
+    # destination_directory = '/home/peter/Desktop/Fish-Dataset/Fish-0223/temp-version'
+    # extract_frames_from_videos(source_directory, destination_directory)
+
+    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    # rename_old_picture(image_source_path_3,'fish-1222-demo18_')
+
+    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    rename_old_picture(image_source_path_4,'fish-1222-demo19_')
+
 
 if __name__ == '__main__':
     main()

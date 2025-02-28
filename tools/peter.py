@@ -410,6 +410,8 @@ class PeterDataset:
             annotation_info['bbox'] = 0,0,output_width,output_height
             annotation_info['keypoints'] = new_keypoints
             annotation_info['area'] = output_width*output_height
+            image_info['width'] = output_width
+            image_info['height'] = output_height
 
             # update the annotation information
             if cropped_flag == False:
