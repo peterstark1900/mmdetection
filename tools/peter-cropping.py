@@ -346,6 +346,10 @@ def main():
     test_json_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/annotations/Fish-Tracker-1222-Test.json'
     test_image_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222/images/Test/'
     fish1222_dataset_test = CustomizeDataset(test_image_output_path, test_json_output_path, 256, 256)
+
+    # single_json_output_path = '/home/peter/Desktop/Fish-Dataset/Fish-0214/fish-0214-demo7-buffer/annotations/Fish-Tracker-0214-Buffer.json'
+    # single_image_output_path = '/home/peter/Desktop/Fish-Dataset/Fish-0214/fish-0214-demo7-buffer/images/Single/'
+    # fish0214_dataset_single = CustomizeDataset(single_image_output_path, single_json_output_path, 256, 256)
 ##############################################################
 
     # train_json_input_path = '/home/peter/Desktop/Fish-Dataset/fish-1210/VID_20241210_155634/annotations/person_keypoints_Train.json'
@@ -406,6 +410,12 @@ def main():
     end_pipeline(fish1222_dataset_test)
 ##############################################################
 
+    # single_json_input_path = '/home/peter/Desktop/Fish-Dataset/Fish-0214/fish-0214-demo7-raw/annotations/fish-0214-demo7-raw.json'
+    # single_image_input_path = '/home/peter/Desktop/Fish-Dataset/Fish-0214/fish-0214-demo7-raw/images/Train/'
+    # # sample_check_for_cropping(single_json_input_path, single_image_input_path, w=256, h=256, sample_id = 456)
+    # file_pipeline(single_json_input_path,single_image_input_path,fish0214_dataset_single)
+    # end_pipeline(fish0214_dataset_single)
+    
 if __name__ == '__main__':
     main()
     
