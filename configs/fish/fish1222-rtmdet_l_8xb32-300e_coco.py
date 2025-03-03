@@ -119,7 +119,8 @@ val_dataloader = dict(
     batch_size=4, num_workers=4, dataset=dict(pipeline=test_pipeline))
 test_dataloader = val_dataloader
 
-max_epochs = 300
+# max_epochs = 300
+max_epochs = 1200
 stage2_num_epochs = 20
 base_lr = 0.004
 interval = 10

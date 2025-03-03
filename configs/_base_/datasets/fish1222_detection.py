@@ -42,7 +42,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='annotations/Fish-Tracker-1222-Train.json',
+        ann_file='annotations/Train/Fish-Tracker-1222-Train.json',
 
         data_prefix=dict(img='images/Train/'),
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
@@ -57,7 +57,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file='annotations/Fish-Tracker-1222-Test.json',
+        ann_file='annotations/Test/Fish-Tracker-1222-Test.json',
         data_prefix=dict(img='images/Test/'),
         test_mode=True,
         pipeline=test_pipeline,
@@ -66,7 +66,7 @@ test_dataloader = val_dataloader
 
 val_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'annotations/Fish-Tracker-1222-Test.json',
+    ann_file=data_root + 'annotations/Test/Fish-Tracker-1222-Test.json',
     metric='bbox',
     format_only=False,
     backend_args=backend_args)

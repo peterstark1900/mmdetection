@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import numpy as np
+import tqdm
 
 
 class PeterDataset:
@@ -12,9 +13,9 @@ class PeterDataset:
     Class of generating customized dataset for mmpose 
     '''
     def __init__(self,save_flag,export_type = None,json_name = None,total_output_path = None,split_output_path = None):
-        '''function to initialize the dataset
+        '''Function to initialize the dataset
         Args:
-            `image_output_path`: the path to save the processedprocessedimages
+            `image_output_path`: the path to save the processed images
             `json_output_path`: the path to save the new dataset
         '''
         self.save_flag = save_flag
@@ -89,7 +90,7 @@ class PeterDataset:
                 self.test_list = []
     
     def build_image_path_dict(self):
-        '''function to build a dictionary for the image paths
+        '''Function to build a dictionary for the image paths
         Args:
             `image_source_paths`: the paths of the images
         Returns:
@@ -102,7 +103,7 @@ class PeterDataset:
         return self.image_dict
 
     def calculate_bbox(self, center_piont, w, h):
-        '''function to calculate the bounding box of the cropped image
+        '''Function to calculate the bounding box of the cropped image
         Args:
             `center_piont`: the center point of the object
             `w`: the width of the cropped image
@@ -118,7 +119,7 @@ class PeterDataset:
         return x1, y1, x2, y2
 
     def cut_with_bbox(self, raw_image,x1, y1, x2, y2,file_name):
-        '''function to crop the image with the bounding box
+        '''Function to crop the image with the bounding box
         Args:
             `raw_image`: the original image
             `x1`, `y1`, `x2`, `y2`: the coordinates of the bounding box(x1, y1, x2, y2), which are the top-left and bottom-right points of the bounding box. This is different from (x, y, w, h)!!!
@@ -143,7 +144,7 @@ class PeterDataset:
             return cropped_image, cropped_flag
         
     def keypoints_tranformation(self, keypoints, x1, y1):
-        ''' function to transform the keypoints
+        ''' Function to transform the keypoints
         Args:
             `keypoints`: the keypoints of the object
             `x1`, `y1`: the top-left point of the bounding box
@@ -161,8 +162,55 @@ class PeterDataset:
                 new_keypoints.extend([x-x1, y-y1, 2])
         return new_keypoints
 
+    def expand_bbox(self, image_info, raw_bbox, scale = None, bbox_width = None, bbox_height = None):
+        ''' Function to expand the bounding box with a scale or the specified width and height.
+        Args:
+            `image_info`: the information of the image (from json file)
+            `raw_bbox`: list, [x1, y1, w, h]
+            `scale`: float, the scale to expand the bbox
+            `bbox_width`: float, the width of the bounding box
+            `bbox_height`: float, the height of the bounding box
+        Returns:
+            `new_x1`, `new_y1`, `new_w`, `new_h`: float, the new bounding box
+        '''
+        x1, y1, w, h = raw_bbox
+        x2 = x1 + w
+        y2 = y1 + h
+        # calculate the center of the bbox
+        center_x = (x1 + x2) / 2
+        center_y = (y1 + y2) / 2
+        if scale == None and bbox_width != None and bbox_height != None:
+
+            # get the witdth and height of the image
+            image_width = image_info['width']
+            image_height = image_info['height']
+            new_x1 = center_x - bbox_width / 2
+            new_y1 = center_y - bbox_height / 2
+
+            # if the new bounding box is out of the image, adjust the bounding box
+            if new_x1 < 0:
+                new_x1 = 0
+            if new_y1 < 0:
+                new_y1 = 0
+            if new_x1 + bbox_width > image_width:
+                new_x1 = image_width - bbox_width
+            if new_y1 + bbox_height > image_height:
+                new_y1 = image_height - bbox_height
+            return new_x1, new_y1, bbox_width, bbox_height
+
+        elif scale != None and bbox_width == None and bbox_height == None:
+            new_w = w * scale
+            new_h = h * scale
+            new_x1 = center_x - new_w / 2
+            new_y1 = center_y - new_h / 2
+            return new_x1, new_y1, new_w, new_h
+        
+        else:
+            print('Please specify the scale or the width and height')
+            return
+
     def update_categories(self, values):
-        '''function to update the list of categories, images, and annotations
+        '''Function to update the list of categories, images, and annotations
         Args:
             `values`: the values to be updated
             `list_type`: the type of the list
@@ -178,7 +226,7 @@ class PeterDataset:
 
     # match and return the category id 
     def get_catergory_id(self, category_name):
-        '''function to match and return the category id
+        '''Function to match and return the category id
         Args:
             category_name: the name of the category
         Returns:    
@@ -189,7 +237,7 @@ class PeterDataset:
                 return self.dataset_categories_list[i]['id']
 
     def setup_categories(self,id,name,supercategory,keypoints,skeleton):
-        '''function to setup the categories of the dataset manually
+        '''Function to setup the categories of the dataset manually
             A single category is a dictionary with the following:
 
                 "categories": [
@@ -232,7 +280,11 @@ class PeterDataset:
     
 
     def load_from_temp_source(self, temp_json_source_path, temp_image_source_path, load_type):
-        '''function to load the images and annotations from the temp source
+        '''Function to load the images and annotations from the temp source
+        Args:
+            `temp_json_source_path`: the path of the json files
+            `temp_image_source_path`: the path of the image files
+            `load_type`: the type of the loading task
         '''
 
         # make sure the same path would not be loaded twice
@@ -257,7 +309,7 @@ class PeterDataset:
             # load json files
             all_json_files = [f for f in os.listdir(temp_json_source_path) 
                     if f.lower().endswith(('json'))]
-
+            pbar = tqdm.tqdm(total=100)
             for json_file in all_json_files:
 
                 # Check out whether the filename of the json file could match the image file from `all_image_files_dir`. 
@@ -321,6 +373,8 @@ class PeterDataset:
                 json_unit = [image_unit, annotation_unit]
                 self.total_list.append(json_unit)
                 self.counter += 1
+                pbar.update(100/len(all_json_files))
+            pbar.close()
 
             print(f'load_from_temp_source {temp_json_source_path} with {load_type} export_type is done')
 
@@ -337,6 +391,7 @@ class PeterDataset:
             category_id_to_name = {category['id']: category['name'] for category in data['categories']}
             self.update_categories(data['categories'])
             # iterate through all the annotations
+            pbar = tqdm.tqdm(total=100)
             for i in range(len(data['annotations'])):
                 annotation_unit = data['annotations'][i]
                 # get the unique id
@@ -345,7 +400,7 @@ class PeterDataset:
                 for image in data['images']:
                     if image['id'] == unique_id:
                         image_unit = image
-                        print(f"image_unit: {image_unit} has been found.")
+                        # print(f"image_unit: {image_unit} has been found.")
                         break
                 # modify the annotation information
                 annotation_unit['id'] = self.counter
@@ -358,11 +413,13 @@ class PeterDataset:
                 json_unit = [image_unit, annotation_unit]
                 self.total_list.append(json_unit)
                 self.counter += 1
+                pbar.update(100/len(data['annotations']))
+            pbar.close()
             print(f'load_from_temp_source {temp_json_source_path} with {load_type} export_type is done')
 
 
     def finish_loding(self):
-        '''function to finish the loading task.
+        '''Function to finish the loading task.
             This function is used to accomplish the building task of the image dictionary, and it should be called after the loading task is done.
         '''
 
@@ -372,7 +429,7 @@ class PeterDataset:
 
 
     def split_dataset(self,train_ratio):
-        '''function to split the dataset into the training and testing sets.
+        '''Function to split the dataset into the training and testing sets.
         This is a temporary version, and it would not consider the varity of the labels.
         Args:
             `train_ratio`: the ratio of the training set
@@ -387,68 +444,145 @@ class PeterDataset:
         print(f"Number of images in the training set: {len(self.train_list)}")
         print(f"Number of images in the testing set: {len(self.test_list)}")
 
-    def crop_pipeline(self,output_width,output_height,image_info,annotation_info,export_image_path = None):
+    def crop_pipeline(self,output_width,output_height,image_info,annotation_info,export_image_path = None,draw_keypoint_flag = False,show_flag = False):
+        '''Function to crop the an image
+        Args:
+            `output_width`: the width of the cropped image
+            `output_height`: the height of the cropped image
+            `image_info`: the information of the image
+            `annotation_info`: the information of the annotation
+            `export_image_path`: the path to save the image
+            `draw_keypoint_flag`: the flag to draw the keypoints on the image
+            `show_flag`: the flag to show the image
+        '''
+        #select keypoint "body" as the center point
+        x = annotation_info['keypoints'][3]
+        y = annotation_info['keypoints'][4]
+        center_point = (x, y)
+        x1, y1, x2, y2 = self.calculate_bbox(center_point, output_width, output_height)
+        # find the file name of the image
+        file_name = image_info['file_name']
+        # get the path of the image
+        image_path = self.image_dict[file_name]
+        # read the original image
+        raw_image = cv2.imread(image_path)
+        if raw_image is None:
+            print(f"Image not found: {image_path}")
+            return False
+        # crop the image
+        cropped_image,cropped_flag = self.cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
+        # modify the annotation information
+        new_keypoints = self.keypoints_tranformation(annotation_info['keypoints'], x1, y1)
+        annotation_info['bbox'] = 0,0,output_width,output_height
+        annotation_info['keypoints'] = new_keypoints
+        annotation_info['area'] = output_width*output_height
+        image_info['width'] = output_width
+        image_info['height'] = output_height
 
-            #select keypoint "body" as the center point
-            x = annotation_info['keypoints'][3]
-            y = annotation_info['keypoints'][4]
-            center_point = (x, y)
-            x1, y1, x2, y2 = self.calculate_bbox(center_point, output_width, output_height)
-            # find the file name of the image
-            file_name = image_info['file_name']
-            # get the path of the image
-            image_path = self.image_dict[file_name]
-            # read the original image
-            raw_image = cv2.imread(image_path)
-            if raw_image is None:
-                print(f"Image not found: {image_path}")
-                return False
-            # crop the image
-            cropped_image,cropped_flag = self.cut_with_bbox(raw_image, x1, y1, x2, y2,file_name)
-            # modify the annotation information
-            new_keypoints = self.keypoints_tranformation(annotation_info['keypoints'], x1, y1)
-            annotation_info['bbox'] = 0,0,output_width,output_height
-            annotation_info['keypoints'] = new_keypoints
-            annotation_info['area'] = output_width*output_height
-            image_info['width'] = output_width
-            image_info['height'] = output_height
-
-            # update the annotation information
-            if cropped_flag == False:
-                print(f"Fail to crop the {file_name}, skip this image")
-                return False
-            else:
-                print(f"Successfully crop the {file_name}")
-                if export_image_path != None:
-                    # save the cropped image
-                    cv2.imwrite(os.path.join(export_image_path, file_name), cropped_image)
-                elif export_image_path == None:
-                    # draw the keypoints on the cropped image
-                    for i in range(0, len(new_keypoints), 3):
-                        x = new_keypoints[i]
-                        y = new_keypoints[i+1]
-                        v = new_keypoints[i+2]
-                        if v == 2:
-                            cv2.circle(cropped_image, (int(x), int(y)), 5, (0, 255, 0), -1)
-                    cv2.imshow('sample-test.png', cropped_image)
-                    cv2.waitKey(3000)
-                    cv2.destroyAllWindows()
-                
-                return True
+        # update the annotation information
+        if cropped_flag == False:
+            print(f"Fail to crop the {file_name}, skip this image")
+            return False
+        else:
+            # print(f"Successfully crop the {file_name}")
+            if draw_keypoint_flag == True:
+                # draw the keypoints on the cropped image
+                for i in range(0, len(new_keypoints), 3):
+                    x = new_keypoints[i]
+                    y = new_keypoints[i+1]
+                    v = new_keypoints[i+2]
+                    if v == 2:
+                        cv2.circle(cropped_image, (int(x), int(y)), 5, (0, 255, 0), -1)   
+            if show_flag == True:
+                cv2.imshow('sample-test.png', cropped_image)
+                cv2.waitKey(3000)
+                cv2.destroyAllWindows()
+            if export_image_path != None:
+                cv2.imwrite(os.path.join(export_image_path, file_name), cropped_image)
+            return True
 
 
-    def export_dataset_pipeline(self,list_of_units,export_image_path,export_json_path,mode,output_width = None, output_height = None):
-        '''function to export a single dataset (or a subset) to the target directory
+    def expanse_pipeline(self,raw_bbox,image_info,annotation_info,scale = None, width=None,height=None, export_image_path = None, draw_keypoint_flag = False,darw_bbox_flag = False,show_flag = False):
+        '''Function to expanse the bounding box of the image
+        Args:
+            `raw_bbox`: the raw bounding box of the image
+            `scale`: the scale to expanse the bounding box
+            `image_info`: the information of the image
+            `annotation_info`: the information of the annotation
+            `export_image_path`: the path to save the image
+            `draw_keypoint_flag`: the flag to draw the keypoints on the image
+            `darw_bbox_flag`: the flag to draw the bounding box on the image
+            `show_flag`: the flag to show the image
+        '''
+        # expand the bounding box
+        new_x1, new_y1, new_w, new_h = self.expand_bbox(image_info, raw_bbox, scale = scale,bbox_width=width,bbox_height=height)
+        # modify the annotation information
+        annotation_info['bbox'] = new_x1, new_y1, new_w, new_h
+        # export the image
+        
+        # get the file name of the image
+        file_name = image_info['file_name']
+        # get the path of the image
+        image_path = self.image_dict[file_name]
+        # read the original image
+        raw_image = cv2.imread(image_path)
+        if raw_image is None:
+            print(f"Image not found: {image_path}")
+            return False
+            
+        if draw_keypoint_flag == True or darw_bbox_flag == True:
+            if draw_keypoint_flag == True:
+                # draw the keypoints on the raw image
+                for i in range(0, len(annotation_info['keypoints']), 3):
+                    x = annotation_info['keypoints'][i]
+                    y = annotation_info['keypoints'][i+1]
+                    v = annotation_info['keypoints'][i+2]
+                    if v == 2:
+                        cv2.circle(raw_image, (int(x), int(y)), 5, (0, 255, 0), -1)
+            if darw_bbox_flag == True:
+                # draw the new bounding box on the raw image
+                x1, y1, w, h = annotation_info['bbox']
+                x2 = x1 + w
+                y2 = y1 + h
+                cv2.rectangle(raw_image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+
+        if show_flag == True:
+            cv2.imshow('sample-test.png', raw_image)
+            cv2.waitKey(3000)
+            cv2.destroyAllWindows()
+
+        if export_image_path != None:
+        # save the raw image
+            cv2.imwrite(os.path.join(export_image_path, file_name), raw_image)
+
+            
+
+    def export_dataset_pipeline(self,list_of_units,export_image_path,export_json_path,mode,output_width = None, output_height = None, scale = None,bbox_width = None, bbox_hight = None, draw_keypoint_flag = False,darw_bbox_flag = False,show_flag = False):
+        '''Function to export a single dataset (or a subset) to the target directory
             Note: This function might be called multiple times to export multiple datasets (or subsets) to the target directory.
+        Args:
+            `list_of_units`: the list of units, each unit contains the information of the image and its annotation
+            `export_image_path`: the path to save the images
+            `export_json_path`: the path to save the json file
+            `mode`: the mode of the exportation
+            `output_width`: the width of the cropped image
+            `output_height`: the height of the cropped image
+            `scale`: the scale to expanse the bounding box
+            `bbox_width`: the width of the bounding box
+            `bbox_hight`: the height of the bounding box
+            `draw_keypoint_flag`: the flag to draw the keypoints on the image
+            `darw_bbox_flag`: the flag to draw the bounding box on the image
+            `show_flag`: the flag to show the image
         '''
         # initialize the lists of images and annotations
         images_list = []
         annotations_list = []
+        pbar = tqdm.tqdm(total=100)
         for unit in list_of_units:
             # get the image and annotation information
             image_info = unit[0]
             annotation_info = unit[1]
-            images_list.append(image_info )
+            images_list.append(image_info)
             annotations_list.append(annotation_info)
 
             # export the image
@@ -472,10 +606,14 @@ class PeterDataset:
                     print('Please specify the output width and height')
                     return
                 # crop the image
-                self.crop_pipeline(output_width,output_height,image_info,annotation_info,export_image_path)
+                self.crop_pipeline(output_width,output_height,image_info,annotation_info,export_image_path,draw_keypoint_flag = False,show_flag = False)
 
-            # if mode == 'expanse':
+            if mode == 'expanse':
+                # expanse the bounding box
+                self.expanse_pipeline(annotation_info['bbox'],image_info,annotation_info,scale = scale,width= bbox_width, height=bbox_hight,export_image_path =export_image_path, draw_keypoint_flag=False,darw_bbox_flag=False,show_flag=False)
 
+            pbar.update(100/len(list_of_units))
+        pbar.close()
         # export the json file with annotations
         data = {
         "categories": self.dataset_categories_list, # the categories of the dataset are always the same
@@ -491,12 +629,15 @@ class PeterDataset:
         print(f'Number of images: {len(images_list)}', end='\n')
     
     def export_original(self):
-        '''function to export the original dataset
+        '''Function to export the original dataset
         '''
         self.export_dataset_pipeline(self.total_list,self.total_image_save_path,self.total_json_export_path,'original')
     
     def export_cropped(self,output_width,output_height):
-        '''function to export the cropped dataset
+        '''Function to export the cropped dataset
+        Args:
+            `output_width`: the width of the cropped image
+            `output_height`: the height of the cropped image
         '''
         if self.train_list == [] or self.test_list == []:
             print('Please split the dataset first')
@@ -506,10 +647,42 @@ class PeterDataset:
             self.export_dataset_pipeline(self.test_list,self.test_image_save_path,self.test_json_export_path,'cropped',output_width,output_height)
 
     def try_cropped(self,w,h,num):
-        '''function to try the cropped function
+        '''Function to try the cropped function
+        Args:
+            `w`: the width of the cropped image
+            `h`: the height of the cropped image
+            `num`: the index of the image in the list `total_list`
         '''
-        self.crop_pipeline(w,h,self.total_list[num][0],self.total_list[num][1])
+        self.crop_pipeline(w,h,self.total_list[num][0],self.total_list[num][1],export_image_path = None,draw_keypoint_flag = True,show_flag = True)
 
+    def export_expanse(self,scale = None, bbox_width = None, bbox_hight = None):
+        '''Function to expanse the bounding box of the image
+        Args:
+            `scale`: the scale to expanse the bounding box
+            `bbox_width`: the width of the bounding box
+            `bbox_hight`: the height of the bounding box
+        
+        Do not provide both a `scale` and bounding box dimensions (`bbox_width`, `bbox_height`) at the same time.You must specify either a scale value or the exact width and height for the bounding box.
+        '''
+        if self.train_list == [] or self.test_list == []:
+            print('Please split the dataset first')
+            return
+        else:
+            self.export_dataset_pipeline(self.train_list,self.train_image_save_path,self.train_json_export_path,'expanse',scale = scale,bbox_width = bbox_width, bbox_hight = bbox_hight)
+            self.export_dataset_pipeline(self.test_list,self.test_image_save_path,self.test_json_export_path,'expanse',scale = scale,bbox_width = bbox_width, bbox_hight = bbox_hight)
+    
+    def try_expanse(self,scale,num):
+        '''Function to try the expanse function
+        Args:
+            `scale`: the scale to expanse the bounding box
+            `num`: the index of the image in the list `total_list`
+        '''
+        self.expanse_pipeline(self.total_list[num][1]['bbox'],scale,self.total_list[num][0],self.total_list[num][1],draw_keypoint_flag=True,darw_bbox_flag=True,show_flag=True)
+
+#################################################################
+'''
+The following functions are the examples of how to use the class `PeterDataset` and its member functions to create a pipeline to handle the dataset.
+'''
 def pipeline_export_total():
     # create the dataset
     my_total_output_path = '/home/peter/Desktop/Fish-Dataset/Fish-0223/2CVAT/fish-0223-demo1'
@@ -564,26 +737,15 @@ def pipeline_check_cropped():
 
     # check the cropping outcome directly
     dataset.try_cropped(256,256,667)
-    
-# def read_multiple_json(source_dir):
-#     all_json_files = [f for f in os.listdir(source_dir) 
-#                    if f.lower().endswith(('json'))]
-#     print(len(all_json_files))
-
-# def read_single_json(json_input_path):
-#     with open(json_input_path, 'r') as f:
-#         data = json.load(f)
-#     keypoints = data[0]['keypoints']
-#     print(keypoints)
-#     # print(keypoints[0][0])
-#     # print(keypoints[0][1])
-#     # print(keypoints[1][0])
-#     bbox = data[0]['bbox'][0]
-#     print(bbox)
-#     test_unit = {"image_id": 0, "category_id": 1, "keypoints": [keypoints[0][0],keypoints[0][1],2,keypoints[1][0],keypoints[1][1],2,keypoints[2][0],keypoints[2][1],2,keypoints[3][0],keypoints[3][1],2], "num_keypoints": 4, "bbox": bbox, "area": 0, "iscrowd": 0}
-#     print(test_unit)
+###############################################################
 
 def formatting_json(json_input_path):
+    '''Function to format the json file
+    Args:
+        `json_input_path`: the path of the json file
+    
+    The json file that export from CVAT is a single line json file, which is not readable. This function is used to format the json file.
+    '''
     with open(json_input_path, 'r') as f:
         data = json.load(f)
     # print(data)
@@ -607,3 +769,25 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+'''
+The following section contains some old functions that are not used in the current version of the class `PeterDataset`.
+'''
+
+# def read_multiple_json(source_dir):
+#     all_json_files = [f for f in os.listdir(source_dir) 
+#                    if f.lower().endswith(('json'))]
+#     print(len(all_json_files))
+
+# def read_single_json(json_input_path):
+#     with open(json_input_path, 'r') as f:
+#         data = json.load(f)
+#     keypoints = data[0]['keypoints']
+#     print(keypoints)
+#     # print(keypoints[0][0])
+#     # print(keypoints[0][1])
+#     # print(keypoints[1][0])
+#     bbox = data[0]['bbox'][0]
+#     print(bbox)
+#     test_unit = {"image_id": 0, "category_id": 1, "keypoints": [keypoints[0][0],keypoints[0][1],2,keypoints[1][0],keypoints[1][1],2,keypoints[2][0],keypoints[2][1],2,keypoints[3][0],keypoints[3][1],2], "num_keypoints": 4, "bbox": bbox, "area": 0, "iscrowd": 0}
+#     print(test_unit)

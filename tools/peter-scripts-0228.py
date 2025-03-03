@@ -31,6 +31,7 @@ def pipeline_export_total():
 def pipeline_export_corpped():
     # create the dataset
     my_split_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222'
+    # my_split_output_path = '/home/peter/Desktop/Fish-Dataset/Fish-0223/check'
     my_json_name = 'Fish-Tracker-1222'
     dataset = PeterDataset(save_flag = True, export_type= 'split',json_name=my_json_name,total_output_path=None, split_output_path = my_split_output_path)
 
@@ -44,15 +45,15 @@ def pipeline_export_corpped():
     image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
     dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # load the images and annotations from the temp source
-    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # # load the images and annotations from the temp source
+    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # load the images and annotations from the temp source
-    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # # load the images and annotations from the temp source
+    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
 
     # finish the loading task
@@ -79,15 +80,15 @@ def pipeline_check_cropped():
     image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
     dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # load the images and annotations from the temp source
-    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # # load the images and annotations from the temp source
+    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # load the images and annotations from the temp source
-    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # # load the images and annotations from the temp source
+    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
 
     # finish the loading task
@@ -96,6 +97,75 @@ def pipeline_check_cropped():
     # check the cropping outcome directly
     dataset.try_cropped(256,256,999)
 
+def pipeline_export_expanse():
+     # create the dataset
+    # my_split_output_path = '/home/peter/mmpose/data/Fish-Tracker-1222'
+    # my_split_output_path = '/home/peter/Desktop/Fish-Dataset/Fish-0223/check'
+    my_split_output_path = '/home/peter/mmdetection/data/Fish-Tracker-1222'
+    my_json_name = 'Fish-Tracker-1222'
+    dataset = PeterDataset(save_flag = True, export_type= 'split',json_name=my_json_name,total_output_path=None, split_output_path = my_split_output_path)
+
+    # load the images and annotations from the temp source
+    json_source_path_1 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/fish-0223-demo1.json'
+    image_source_path_1 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/fish-0223-demo1'
+    dataset.load_from_temp_source(json_source_path_1,image_source_path_1,'cvat')
+
+    # load the images and annotations from the temp source
+    json_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/TEST-MAM30B15W15R15E.json'
+    image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
+    dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
+
+    # # load the images and annotations from the temp source
+    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+
+    # # load the images and annotations from the temp source
+    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+
+
+    # finish the loading task
+    dataset.finish_loding()
+
+    # split the dataset
+    dataset.split_dataset(0.8)
+
+    # export the dataset
+    dataset.export_expanse(bbox_width = 256, bbox_hight = 256)
+
+
+def pipeline_check_expanse():
+
+    # create the dataset
+    dataset = PeterDataset(save_flag = False)
+
+    # load the images and annotations from the temp source
+    json_source_path_1 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/fish-0223-demo1.json'
+    image_source_path_1 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/fish-0223-demo1'
+    dataset.load_from_temp_source(json_source_path_1,image_source_path_1,'cvat')
+
+    # # load the images and annotations from the temp source
+    # json_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/TEST-MAM30B15W15R15E.json'
+    # image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
+    # dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
+
+    # # load the images and annotations from the temp source
+    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+
+    # # load the images and annotations from the temp source
+    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+
+    # finish the loading task
+    dataset.finish_loding()
+
+    # check the expanse outcome directly
+    dataset.try_expanse(2,1)
 def main():
 
     # formatting_json('/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json')
@@ -103,6 +173,8 @@ def main():
     # # pipeline_export_total()
     pipeline_export_corpped()
     # pipeline_check_cropped()
+    # pipeline_check_expanse()
+    # pipeline_export_expanse()
 
 if __name__ == '__main__':
     main()
