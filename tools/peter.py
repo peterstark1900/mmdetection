@@ -130,13 +130,13 @@ class PeterDataset:
         '''
         height, width, _ = raw_image.shape
         if x1< 0 or y1 < 0 or x2 > width or y2 > height:
-            print(f"Invalid crop area for origin image: {file_name}")
-            print(f"Image size: {width}x{height}")
-            print(f"Crop area: {x1}, {y1}, {x2}, {y2}")
+            # print(f"Invalid crop area for origin image: {file_name}")
+            # print(f"Image size: {width}x{height}")
+            # print(f"Crop area: {x1}, {y1}, {x2}, {y2}")
             expand_image = cv2.copyMakeBorder(raw_image, height, height, width, width, cv2.BORDER_CONSTANT, value=[0, 0, 0])
             cropped_image = expand_image[int(y1)+height:int(y2)+height, int(x1)+width:int(x2)+width]
             cropped_flag = True
-            print(f"Successfully crop the {file_name} after expanding the image")
+            # print(f"Successfully crop the {file_name} after expanding the image")
             return cropped_image, cropped_flag
         else:
             cropped_image = raw_image[int(y1):int(y2), int(x1):int(x2)]
@@ -404,6 +404,7 @@ class PeterDataset:
                         break
                 # modify the annotation information
                 annotation_unit['id'] = self.counter
+                image_unit['id'] = self.counter
                 annotation_unit['image_id'] = self.counter
                 # get the category name
                 category_name = category_id_to_name.get(annotation_unit['category_id'], None)
@@ -606,11 +607,11 @@ class PeterDataset:
                     print('Please specify the output width and height')
                     return
                 # crop the image
-                self.crop_pipeline(output_width,output_height,image_info,annotation_info,export_image_path,draw_keypoint_flag = False,show_flag = False)
+                self.crop_pipeline(output_width,output_height,image_info,annotation_info,export_image_path,draw_keypoint_flag =  draw_keypoint_flag ,show_flag = show_flag)
 
             if mode == 'expanse':
                 # expanse the bounding box
-                self.expanse_pipeline(annotation_info['bbox'],image_info,annotation_info,scale = scale,width= bbox_width, height=bbox_hight,export_image_path =export_image_path, draw_keypoint_flag=False,darw_bbox_flag=False,show_flag=False)
+                self.expanse_pipeline(annotation_info['bbox'],image_info,annotation_info,scale = scale,width= bbox_width, height=bbox_hight,export_image_path =export_image_path, draw_keypoint_flag= draw_keypoint_flag ,darw_bbox_flag= darw_bbox_flag,show_flag= show_flag)
 
             pbar.update(100/len(list_of_units))
         pbar.close()
@@ -643,8 +644,8 @@ class PeterDataset:
             print('Please split the dataset first')
             return
         else:
-            self.export_dataset_pipeline(self.train_list,self.train_image_save_path,self.train_json_export_path,'cropped',output_width,output_height)
-            self.export_dataset_pipeline(self.test_list,self.test_image_save_path,self.test_json_export_path,'cropped',output_width,output_height)
+            self.export_dataset_pipeline(self.train_list,self.train_image_save_path,self.train_json_export_path,'cropped',output_width,output_height,draw_keypoint_flag=False)
+            self.export_dataset_pipeline(self.test_list,self.test_image_save_path,self.test_json_export_path,'cropped',output_width,output_height,draw_keypoint_flag=False)
 
     def try_cropped(self,w,h,num):
         '''Function to try the cropped function

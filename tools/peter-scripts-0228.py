@@ -45,15 +45,15 @@ def pipeline_export_corpped():
     image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
     dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # # load the images and annotations from the temp source
-    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # # load the images and annotations from the temp source
-    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
 
     # finish the loading task
@@ -80,15 +80,15 @@ def pipeline_check_cropped():
     image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
     dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # # load the images and annotations from the temp source
-    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # # load the images and annotations from the temp source
-    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
 
     # finish the loading task
@@ -115,15 +115,15 @@ def pipeline_export_expanse():
     image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
     dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # # load the images and annotations from the temp source
-    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # # load the images and annotations from the temp source
-    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
 
     # finish the loading task
@@ -146,20 +146,20 @@ def pipeline_check_expanse():
     image_source_path_1 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/fish-0223-demo1'
     dataset.load_from_temp_source(json_source_path_1,image_source_path_1,'cvat')
 
-    # # load the images and annotations from the temp source
-    # json_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/TEST-MAM30B15W15R15E.json'
-    # image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
-    # dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
+    # load the images and annotations from the temp source
+    json_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/real_annotations/TEST-MAM30B15W15R15E.json'
+    image_source_path_2 = '/home/peter/Desktop/Fish-Dataset/Fish-0223/extract_outcome/TEST-MAM30B15W15R15E'
+    dataset.load_from_temp_source(json_source_path_2,image_source_path_2,'cvat') 
 
-    # # load the images and annotations from the temp source
-    # json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
-    # image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
-    # dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json'
+    image_source_path_3 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/images/Train/'
+    dataset.load_from_temp_source(json_source_path_3,image_source_path_3,'cvat')
 
-    # # load the images and annotations from the temp source
-    # json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
-    # image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
-    # dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
+    # load the images and annotations from the temp source
+    json_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/annotations/fish-1222-demo19.json'
+    image_source_path_4 = '/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo19/images/Test/'
+    dataset.load_from_temp_source(json_source_path_4,image_source_path_4,'cvat')
 
     # finish the loading task
     dataset.finish_loding()
@@ -171,10 +171,10 @@ def main():
     # formatting_json('/home/peter/Desktop/Fish-Dataset/fish-1222/fish-1222-demo18/annotations/fish-1222-demo18.json')
 
     # # pipeline_export_total()
-    pipeline_export_corpped()
+    # pipeline_export_corpped()
     # pipeline_check_cropped()
     # pipeline_check_expanse()
-    # pipeline_export_expanse()
+    pipeline_export_expanse()
 
 if __name__ == '__main__':
     main()
